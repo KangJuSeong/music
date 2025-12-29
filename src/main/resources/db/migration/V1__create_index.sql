@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_release_date ON songs(release_date);

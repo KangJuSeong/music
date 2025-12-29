@@ -3,5 +3,10 @@ spring:
     name: music
   r2dbc:
     url: localhost
-    username: localhost
-    password: localhost
+    username: root
+    password: root
+logging:
+  level:
+    org:
+      springframework:
+        r2dbc: debug
