@@ -1,3 +1,12 @@
 spring:
   application:
     name: music
+  r2dbc:
+    url: localhost
+    username: root
+    password: root
+logging:
+  level:
+    org:
+      springframework:
+        r2dbc: debug
