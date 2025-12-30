@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 public class MusicDeserializerTest {
     private ObjectMapper objectMapper;
-    private final static String json =
+    public final static String json =
             """
                 {
                     "Artist(s)": "!!!",
