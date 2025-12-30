@@ -1,7 +1,6 @@
 package com.example.music.init;
 
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -26,7 +25,7 @@ public class IndexInitializer {
     }
 
     private void createIndexIfNotExists(IndexInfo indexInfo) {
-        String isExistIndex=
+        String isExistIndexQuery=
                 """
                 SELECT COUNT(*) AS count
                 FROM INFORMATION_SCHEMA.STATISTICS
@@ -34,20 +33,20 @@ public class IndexInitializer {
                     AND TABLE_NAME = :table
                     AND INDEX_NAME = :name
                 """;
-        String createIndex =
+        String createIndexQuery =
                 """
                 CREATE INDEX %s
                 ON %s(%s)
                 """
                 .formatted(indexInfo.name, indexInfo.table, indexInfo.columnName);
-        client.sql(isExistIndex)
+        client.sql(isExistIndexQuery)
                 .bind("table", indexInfo.table)
                 .bind("name", indexInfo.name)
                 .map(result -> result.get("count", Integer.class))
                 .first()
                 .flatMap(count -> {
                     if (count == 0) {
-                        return client.sql(createIndex).then();
+                        return client.sql(createIndexQuery).then();
                     } else {
                         return Mono.empty();
                     }
