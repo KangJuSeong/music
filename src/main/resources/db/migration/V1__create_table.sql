@@ -10,8 +10,9 @@ CREATE TABLE IF NOT EXISTS songs (
     tempo DOUBLE,                                -- 템포
     loudness DOUBLE,                             -- 데시벨
     time_signature VARCHAR(10),                  -- 박자 (ex: 4/4)
-    explicit BOOLEAN DEFAULT FALSE,              -- 노골적인 가사 포함 여부
-    release_date DATE DEFAULT NULL               -- 발매일
+    explicit BOOLEAN,                            -- 노골적인 가사 포함 여부
+    release_date DATE,                           -- 발매일
+    lyrics TEXT                                  -- 가사
 );
 
 CREATE TABLE IF NOT EXISTS song_features (
