@@ -1,19 +1,20 @@
 package com.example.music.init;
 
-import jakarta.annotation.PostConstruct;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-public class IndexInitializer {
+public class IndexInitializer implements ApplicationRunner {
     private final DatabaseClient client;
     public IndexInitializer(DatabaseClient client) {
         this.client = client;
     }
 
-    @PostConstruct
-    public void indexInit() {
+    @Override
+    public void run(ApplicationArguments args) {
         IndexInfo[] indexInfos = new IndexInfo[] {
                 new IndexInfo("idx_release_date", "songs", "release_date"),
                 new IndexInfo("idx_artist", "songs", "artist")
