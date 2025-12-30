@@ -7,6 +7,12 @@ spring:
     password: root
 logging:
   level:
+    com:
+      example:
+        music: debug
     org:
       springframework:
         r2dbc: debug
+resource:
+  json:
+    path: path
