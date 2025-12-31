@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS songs (
 
 CREATE TABLE IF NOT EXISTS artists (
     artist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    artist_name VARCHAR(800),
+    artist_name VARCHAR(100),
     album_id BIGINT NOT NULL,
     CONSTRAINT fk_artist_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
         ON DELETE CASCADE

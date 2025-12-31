@@ -13,8 +13,7 @@ public class TableInitializer extends ConnectionFactoryInitializer {
         super.setConnectionFactory(connectionFactory);
         super.setDatabasePopulator(
                 new ResourceDatabasePopulator(
-                        new ClassPathResource("db/migration/V1__create_table.sql"),
-                        new ClassPathResource("db/migration/V1__modify_similar_songs.sql")
+                        new ClassPathResource("db/migration/V2__create_tables.sql")
                 )
         );
     }
