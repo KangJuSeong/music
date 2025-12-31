@@ -11,7 +11,7 @@ import lombok.Data;
 @Builder
 public class ArtistEntity {
     @Id
-    private long artistId;
+    private Long artistId;
     private String artistName;
     private long albumId;
     private long songId;

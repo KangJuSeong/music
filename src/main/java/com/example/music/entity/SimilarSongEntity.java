@@ -11,9 +11,9 @@ import lombok.Data;
 @Builder
 public class SimilarSongEntity {
     @Id
-    private long similarId;
+    private Long similarId;
     private String similarArtist;
     private String similarSong;
     private double similarScore;
-    private long songId;
+    private Long songId;
 }

@@ -11,7 +11,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 public class SongEntity {
     @Id
-    private long songId;
+    private Long songId;
     private String songName;
     private String length;
     private String genre;

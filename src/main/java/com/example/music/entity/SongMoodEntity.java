@@ -11,7 +11,7 @@ import lombok.Data;
 @Builder
 public class SongMoodEntity {
     @Id
-    private long moodId;
+    private Long moodId;
     private int popularity;
     private int energy;
     private int danceability;
@@ -19,5 +19,5 @@ public class SongMoodEntity {
     private int speechiness;
     private int liveness;
     private int acousticness;
-    private long songId;
+    private Long songId;
 }

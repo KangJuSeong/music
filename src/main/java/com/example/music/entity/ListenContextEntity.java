@@ -11,14 +11,14 @@ import lombok.Data;
 @Builder
 public class ListenContextEntity {
     @Id
-    private long contextId;
+    private Long contextId;
     private boolean party;
-    private boolean wokrOrStudy;
+    private boolean workOrStudy;
     private boolean relaxationOrMeditation;
     private boolean exercise;
     private boolean yogaStretching;
     private boolean driving;
     private boolean socialGathering;
     private boolean morningRoutine;
-    private long songId;
+    private Long songId;
 }

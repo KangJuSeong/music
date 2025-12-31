@@ -11,11 +11,11 @@ import lombok.Data;
 @Builder
 public class SongFeatureEntity {
     @Id
-    private long featureId;
+    private Long  featureId;
     private String emotion;
     private String keySignature;
     private String timeSignature;
     private double tempo;
     private double loudness;
-    private long songId;
+    private Long  songId;
 }
