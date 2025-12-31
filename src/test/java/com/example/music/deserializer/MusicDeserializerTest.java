@@ -1,7 +1,7 @@
 package com.example.music.deserializer;
 
 import com.example.music.dto.MusicJsonDto;
-import com.example.music.dto.SimilarSong;
+import com.example.music.dto.SimilarSongJsonDto;
 import com.example.music.init.DataInitializer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,17 +123,17 @@ public class MusicDeserializerTest {
         assertFalse(dto.isSocialGatherings());
         assertFalse(dto.isMorningRoutine());
 
-        SimilarSong firstSimilarSong = dto.getSimilarSongs().getFirst();
+        SimilarSongJsonDto firstSimilarSong = dto.getSimilarSongs().getFirst();
         assertEquals("Corey Smith", firstSimilarSong.getArtist());
         assertEquals("If I Could Do It Again", firstSimilarSong.getSimilarSong());
         assertEquals(0.9860607848, firstSimilarSong.getScore());
 
-        SimilarSong secondSimilarSong = dto.getSimilarSongs().get(1);
+        SimilarSongJsonDto secondSimilarSong = dto.getSimilarSongs().get(1);
         assertEquals("Toby Keith", secondSimilarSong.getArtist());
         assertEquals("Drinks After Work", secondSimilarSong.getSimilarSong());
         assertEquals(0.9837194774, secondSimilarSong.getScore());
 
-        SimilarSong thirdSimilarSong = dto.getSimilarSongs().getLast();
+        SimilarSongJsonDto thirdSimilarSong = dto.getSimilarSongs().getLast();
         assertEquals("Space", thirdSimilarSong.getArtist());
         assertEquals("Neighbourhood", thirdSimilarSong.getSimilarSong());
         assertEquals(0.9832363508, thirdSimilarSong.getScore());
