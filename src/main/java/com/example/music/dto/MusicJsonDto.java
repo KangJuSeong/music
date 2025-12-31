@@ -3,6 +3,8 @@ package com.example.music.dto;
 import com.example.music.dto.deserializer.SimilarSongDeserializer;
 import com.example.music.dto.deserializer.YesNoBooleanDeserializer;
 import com.example.music.dto.deserializer.ZeroOneBooleanDeserializer;
+import com.example.music.entity.AlbumEntity;
+import com.example.music.entity.SongEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -86,5 +88,5 @@ public class MusicJsonDto {
     private boolean morningRoutine;
     @JsonDeserialize(contentUsing = SimilarSongDeserializer.class)
     @JsonProperty("Similar Songs")
-    private List<SimilarSong> similarSongs;
+    private List<SimilarSongJsonDto> similarSongs;
 }

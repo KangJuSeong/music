@@ -1,6 +1,6 @@
 package com.example.music.dto.deserializer;
 
-import com.example.music.dto.SimilarSong;
+import com.example.music.dto.SimilarSongJsonDto;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -10,11 +10,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class SimilarSongDeserializer extends JsonDeserializer<SimilarSong> {
+public class SimilarSongDeserializer extends JsonDeserializer<SimilarSongJsonDto> {
     @Override
-    public SimilarSong deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public SimilarSongJsonDto deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-        SimilarSong similarSong = new SimilarSong();
+        SimilarSongJsonDto similarSong = new SimilarSongJsonDto();
         Iterator<String> fieldNames = node.fieldNames();
         while (fieldNames.hasNext()) {
             String key = fieldNames.next();
