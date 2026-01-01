@@ -13,6 +13,4 @@ public class ArtistEntity {
     @Id
     private Long artistId;
     private String artistName;
-    private long albumId;
-    private long songId;
 }

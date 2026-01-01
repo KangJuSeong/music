@@ -19,5 +19,6 @@ public class SongMoodEntity {
     private int speechiness;
     private int liveness;
     private int acousticness;
+    private int instrumentalness;
     private Long songId;
 }

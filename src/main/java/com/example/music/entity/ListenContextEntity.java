@@ -16,6 +16,7 @@ public class ListenContextEntity {
     private boolean workOrStudy;
     private boolean relaxationOrMeditation;
     private boolean exercise;
+    private boolean running;
     private boolean yogaStretching;
     private boolean driving;
     private boolean socialGathering;

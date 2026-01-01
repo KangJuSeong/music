@@ -19,15 +19,31 @@ CREATE TABLE IF NOT EXISTS songs (
 
 CREATE TABLE IF NOT EXISTS artists (
     artist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    artist_name VARCHAR(100),
-    album_id BIGINT NOT NULL,
-    CONSTRAINT fk_artist_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
+    artist_name VARCHAR(500)
+);
+
+CREATE TABLE IF NOT EXISTS artists_albums (
+    artist_id BIGINT,
+    album_id BIGINT,
+    PRIMARY KEY (artist_id, album_id),
+    CONSTRAINT fk_aa_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    song_id BIGINT NOT NULL,
-    CONSTRAINT fk_artist_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
+    CONSTRAINT fk_aa_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE   
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS artists_songs (
+    artist_id BIGINT,
+    song_id BIGINT,
+    PRIMARY KEY (artist_id, song_id),
+   CONSTRAINT fk_as_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fs_as_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS song_features (
