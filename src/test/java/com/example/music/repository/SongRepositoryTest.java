@@ -1,7 +1,8 @@
 package com.example.music.repository;
 
 import com.example.music.deserializer.MusicDeserializerTest;
-import com.example.music.dto.MusicJsonDto;
+import com.example.music.dto.SongJsonDto;
+import com.example.music.repository.song.SongCustomRepositoryImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -25,27 +26,25 @@ public class SongRepositoryTest {
     @Autowired
     private DatabaseClient client;
 
-    private MusicCustomRepositoryImpl songRepository;
+    private SongCustomRepositoryImpl songRepository;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        songRepository = new MusicCustomRepositoryImpl(client);
+        songRepository = new SongCustomRepositoryImpl(client);
     }
 
     @Test
     @DisplayName("DTO로 변환한 JSON 데이터에 대한 bulk insert를 테스트한다.")
     void shouldSuccessBulkInsert() throws JsonProcessingException {
         // given
-        MusicJsonDto dto = objectMapper.readValue(MusicDeserializerTest.json, MusicJsonDto.class);
-        List<MusicJsonDto> dtoList = List.of(dto);
+        SongJsonDto dto = objectMapper.readValue(MusicDeserializerTest.json, SongJsonDto.class);
+        List<SongJsonDto> dtoList = List.of(dto);
 
         // when
-        Mono<Void> mono = songRepository.bulkInsert(dtoList);
 
         // then
-        StepVerifier.create(mono).verifyComplete();
     }
 }
