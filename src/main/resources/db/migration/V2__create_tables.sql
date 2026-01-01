@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS albums (
     album_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    album_name VARCHAR(300),
+    album_name VARCHAR(255),
     release_date DATE
 );
 
@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS artists (
 
 CREATE TABLE IF NOT EXISTS songs (
     song_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    song_name VARCHAR(300),
-    genre VARCHAR(100),
+    song_name VARCHAR(255),
+    genre VARCHAR(255),
     length VARCHAR(10),
     explicit BOOLEAN DEFAULT FALSE,
     lyrics LONGTEXT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS songs (
 );
 
 CREATE TABLE IF NOT EXISTS artists_albums (
-    split_artist_name VARCHAR(100),
+    split_artist_name VARCHAR(255),
     album_id BIGINT,
     PRIMARY KEY (split_artist_name, album_id),
     CONSTRAINT fk_aa_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS artists_albums (
 
 CREATE TABLE IF NOT EXISTS song_features (
     feature_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    emotion VARCHAR(100),
+    emotion VARCHAR(255),
     key_signature VARCHAR(10),
     time_signature VARCHAR(10),
     tempo DOUBLE,
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS listen_contexts (
 
 CREATE TABLE IF NOT EXISTS similar_songs (
     similar_id BIGINT AUTO_INCREMENT PRIMARY KEY,        
-    similar_artist VARCHAR(255) NOT NULL,        
+    similar_artist TEXT NOT NULL,
     similar_song VARCHAR(255) NOT NULL,          
     similar_score DOUBLE,                        
     song_id BIGINT NOT NULL,                     
