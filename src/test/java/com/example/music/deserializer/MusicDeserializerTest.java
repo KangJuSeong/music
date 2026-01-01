@@ -3,6 +3,7 @@ package com.example.music.deserializer;
 import com.example.music.dto.SongJsonDto;
 import com.example.music.dto.SimilarSongJsonDto;
 import com.example.music.init.DataInitializer;
+import com.example.music.statics.StaticTestDataRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,58 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 public class MusicDeserializerTest {
     private ObjectMapper objectMapper;
-    public final static String json =
-            """
-                {
-                    "Artist(s)": "!!!",
-                    "song": "Even When the Waters Cold",
-                    "text": "Friends told her",
-                    "Length": "03:47",
-                    "emotion": "sadness",
-                    "Genre": "hip hop",
-                    "Album": "Thr!!!er",
-                    "Release Date": "2013-04-29",
-                    "Key": "D min",
-                    "Tempo": 0.4378698225,
-                    "Loudness (db)": 0.785065407,
-                    "Time signature": "4\\/4",
-                    "Explicit": "No",
-                    "Popularity": "40",
-                    "Energy": "83",
-                    "Danceability": "71",
-                    "Positiveness": "87",
-                    "Speechiness": "4",
-                    "Liveness": "16",
-                    "Acousticness": "11",
-                    "Instrumentalness": "0",
-                    "Good for Party": 0,
-                    "Good for Work\\/Study": 0,
-                    "Good for Relaxation\\/Meditation": 0,
-                    "Good for Exercise": 0,
-                    "Good for Running": 0,
-                    "Good for Yoga\\/Stretching": 0,
-                    "Good for Driving": 0,
-                    "Good for Social Gatherings": 0,
-                    "Good for Morning Routine": 0,
-                    "Similar Songs": [
-                        {
-                            "Similar Artist 1": "Corey Smith",
-                            "Similar Song 1": "If I Could Do It Again",
-                            "Similarity Score": 0.9860607848
-                        },
-                        {
-                            "Similar Artist 2": "Toby Keith",
-                            "Similar Song 2": "Drinks After Work",
-                            "Similarity Score": 0.9837194774
-                        },
-                        {
-                            "Similar Artist 3": "Space",
-                            "Similar Song 3": "Neighbourhood",
-                            "Similarity Score": 0.9832363508
-                        }
-                    ]
-                }
-                """;
+
 
     @BeforeEach
     void setUp() {
@@ -87,7 +37,7 @@ public class MusicDeserializerTest {
     @DisplayName("JSON 데이터를 DTO로 정상적으로 변환되어야 한다")
     void shouldReturnMusicJsonDtoTest() throws JsonProcessingException {
         // when
-        SongJsonDto dto = objectMapper.readValue(json, SongJsonDto.class);
+        SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
 
         // then
         assertEquals("!!!", dto.getArtist());
@@ -143,11 +93,11 @@ public class MusicDeserializerTest {
     @DisplayName("JSON 데이터를 읽고 MusicJsonDto로 변환하여 Flux로 반환한다")
     void shouldReturnMusicJsonDtoFlux() throws IOException {
         // given
-        String ndjson = json.replace("\n", "").replace("\r", "");
-        String ndjsons = ndjson + "\n" + ndjson.replace("!!!", "modify");
+        String json = StaticTestDataRepository.testJson;
+        String ndjson = json + "\n" + json.replace("!!!", "modify");
         DataInitializer dataInitializer = new DataInitializer();
         File testFile = File.createTempFile("test", ".json");
-        Files.writeString(testFile.toPath(), ndjsons, StandardOpenOption.WRITE);
+        Files.writeString(testFile.toPath(), ndjson, StandardOpenOption.WRITE);
 
         // when
         Flux<SongJsonDto> flux = dataInitializer.streamJsonToDto(testFile);
