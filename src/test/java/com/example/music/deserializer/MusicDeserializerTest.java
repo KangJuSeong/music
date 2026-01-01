@@ -1,6 +1,6 @@
 package com.example.music.deserializer;
 
-import com.example.music.dto.MusicJsonDto;
+import com.example.music.dto.SongJsonDto;
 import com.example.music.dto.SimilarSongJsonDto;
 import com.example.music.init.DataInitializer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -87,7 +87,7 @@ public class MusicDeserializerTest {
     @DisplayName("JSON 데이터를 DTO로 정상적으로 변환되어야 한다")
     void shouldReturnMusicJsonDtoTest() throws JsonProcessingException {
         // when
-        MusicJsonDto dto = objectMapper.readValue(json, MusicJsonDto.class);
+        SongJsonDto dto = objectMapper.readValue(json, SongJsonDto.class);
 
         // then
         assertEquals("!!!", dto.getArtist());
@@ -124,19 +124,19 @@ public class MusicDeserializerTest {
         assertFalse(dto.isMorningRoutine());
 
         SimilarSongJsonDto firstSimilarSong = dto.getSimilarSongs().getFirst();
-        assertEquals("Corey Smith", firstSimilarSong.getArtist());
+        assertEquals("Corey Smith", firstSimilarSong.getSimilarArtist());
         assertEquals("If I Could Do It Again", firstSimilarSong.getSimilarSong());
-        assertEquals(0.9860607848, firstSimilarSong.getScore());
+        assertEquals(0.9860607848, firstSimilarSong.getSimilarScore());
 
         SimilarSongJsonDto secondSimilarSong = dto.getSimilarSongs().get(1);
-        assertEquals("Toby Keith", secondSimilarSong.getArtist());
+        assertEquals("Toby Keith", secondSimilarSong.getSimilarArtist());
         assertEquals("Drinks After Work", secondSimilarSong.getSimilarSong());
-        assertEquals(0.9837194774, secondSimilarSong.getScore());
+        assertEquals(0.9837194774, secondSimilarSong.getSimilarScore());
 
         SimilarSongJsonDto thirdSimilarSong = dto.getSimilarSongs().getLast();
-        assertEquals("Space", thirdSimilarSong.getArtist());
+        assertEquals("Space", thirdSimilarSong.getSimilarArtist());
         assertEquals("Neighbourhood", thirdSimilarSong.getSimilarSong());
-        assertEquals(0.9832363508, thirdSimilarSong.getScore());
+        assertEquals(0.9832363508, thirdSimilarSong.getSimilarScore());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class MusicDeserializerTest {
         Files.writeString(testFile.toPath(), ndjsons, StandardOpenOption.WRITE);
 
         // when
-        Flux<MusicJsonDto> flux = dataInitializer.streamJsonToDto(testFile);
+        Flux<SongJsonDto> flux = dataInitializer.streamJsonToDto(testFile);
 
         // then
         StepVerifier.create(flux)

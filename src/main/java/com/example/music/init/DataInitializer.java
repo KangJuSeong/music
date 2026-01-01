@@ -1,6 +1,6 @@
 package com.example.music.init;
 
-import com.example.music.dto.MusicJsonDto;
+import com.example.music.dto.SongJsonDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -22,13 +22,13 @@ public class DataInitializer {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    public Flux<MusicJsonDto> streamJsonToDto(File file) {
+    public Flux<SongJsonDto> streamJsonToDto(File file) {
         return Flux.using(
                 () -> Files.newBufferedReader(file.toPath()),
                 reader -> Flux.fromStream(reader.lines())
                         .map(line -> {
                             try {
-                                return objectMapper.readValue(line, MusicJsonDto.class);
+                                return objectMapper.readValue(line, SongJsonDto.class);
                             } catch (JsonProcessingException e) {
                                 log.error("Fail JSON to DTO");
                                 throw new RuntimeException(e.getMessage());

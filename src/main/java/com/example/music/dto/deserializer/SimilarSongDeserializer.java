@@ -20,13 +20,13 @@ public class SimilarSongDeserializer extends JsonDeserializer<SimilarSongJsonDto
             String key = fieldNames.next();
             if (key.contains("Similar Artist")) {
                 String value = node.get(key).textValue();
-                similarSong.setArtist(value);
+                similarSong.setSimilarArtist(value);
             } else if (key.contains("Similar Song")) {
                 String value = node.get(key).textValue();
                 similarSong.setSimilarSong(value);
             } else if (key.contains("Similarity Score")) {
                 double value = node.get(key).asDouble();
-                similarSong.setScore(value);
+                similarSong.setSimilarScore(value);
             } else {
                 throw new IllegalArgumentException("No contains key artis, song, score");
             }
