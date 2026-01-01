@@ -1,6 +1,6 @@
 package com.example.music.controller;
 
-import com.example.music.service.MusicService;
+import com.example.music.service.MusicSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,9 +11,9 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/music")
 @Slf4j
 public class MusicController {
-    private final MusicService songService;
+    private final MusicSyncService songService;
 
-    public MusicController(MusicService songService) {
+    public MusicController(MusicSyncService songService) {
         this.songService = songService;
     }
 
