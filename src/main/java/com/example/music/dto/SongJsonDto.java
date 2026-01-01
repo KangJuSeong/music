@@ -89,13 +89,14 @@ public class SongJsonDto {
     @JsonProperty("Similar Songs")
     private List<SimilarSongJsonDto> similarSongs;
 
-    public SongEntity toSongEntity(Long albumId) {
+    public SongEntity toSongEntity(Long albumId, Long artistId) {
         return SongEntity.builder()
                 .songName(song)
                 .genre(genre)
                 .length(length)
                 .explicit(explicit)
                 .lyrics(lyrics)
+                .artistId(artistId)
                 .albumId(albumId)
                 .build();
     }
@@ -104,6 +105,12 @@ public class SongJsonDto {
         return AlbumEntity.builder()
                 .albumName(album)
                 .releaseDate(releaseDate)
+                .build();
+    }
+
+    public ArtistEntity toArtistEntity(String artistName) {
+        return ArtistEntity.builder()
+                .artistName(artistName)
                 .build();
     }
 
@@ -143,12 +150,6 @@ public class SongJsonDto {
                 .socialGathering(socialGatherings)
                 .morningRoutine(morningRoutine)
                 .songId(songId)
-                .build();
-    }
-
-    public static ArtistEntity toArtistEntity(String artistName) {
-        return ArtistEntity.builder()
-                .artistName(artistName)
                 .build();
     }
 }

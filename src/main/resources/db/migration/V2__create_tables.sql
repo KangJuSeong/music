@@ -4,6 +4,11 @@ CREATE TABLE IF NOT EXISTS albums (
     release_date DATE
 );
 
+CREATE TABLE IF NOT EXISTS artists (
+    artist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    artist_name LONGTEXT
+);
+
 CREATE TABLE IF NOT EXISTS songs (
     song_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     song_name VARCHAR(300),
@@ -11,37 +16,21 @@ CREATE TABLE IF NOT EXISTS songs (
     length VARCHAR(10),
     explicit BOOLEAN DEFAULT FALSE,
     lyrics LONGTEXT,
+    artist_id BIGINT NOT NULL,
     album_id BIGINT NOT NULL,
+    CONSTRAINT fk_song_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     CONSTRAINT fk_song_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS artists (
-    artist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    artist_name VARCHAR(500)
-);
-
 CREATE TABLE IF NOT EXISTS artists_albums (
-    artist_id BIGINT,
+    split_artist_name VARCHAR(100),
     album_id BIGINT,
-    PRIMARY KEY (artist_id, album_id),
-    CONSTRAINT fk_aa_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
+    PRIMARY KEY (split_artist_name, album_id),
     CONSTRAINT fk_aa_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS artists_songs (
-    artist_id BIGINT,
-    song_id BIGINT,
-    PRIMARY KEY (artist_id, song_id),
-   CONSTRAINT fk_as_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT fs_as_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );

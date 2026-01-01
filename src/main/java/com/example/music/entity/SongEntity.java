@@ -17,5 +17,6 @@ public class SongEntity {
     private String genre;
     private String lyrics;
     private boolean explicit;
+    private long artistId;
     private long albumId;
 }

@@ -9,6 +9,6 @@ import org.springframework.data.relational.core.mapping.Table;
 @Data
 @AllArgsConstructor
 public class ArtistAlbumEntity {
-    private Long artistId;
+    private String splitArtistName;
     private Long albumId;
 }
