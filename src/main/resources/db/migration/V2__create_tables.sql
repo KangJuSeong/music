@@ -1,12 +1,3 @@
-DROP TABLE IF EXISTS song_features;
-DROP TABLE IF EXISTS listening_contexts;
-DROP TABLE IF EXISTS song_moods;
-DROP TABLE IF EXISTS similar_songs;
-DROP TABLE IF EXISTS artists_albums;
-DROP TABLE IF EXISTS songs;
-DROP TABLE IF EXISTS artists;
-DROP TABLE IF EXISTS albums;
-
 CREATE TABLE IF NOT EXISTS albums (
     album_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     album_name VARCHAR(255),
@@ -58,44 +49,44 @@ CREATE TABLE IF NOT EXISTS song_features (
 );
 
 CREATE TABLE IF NOT EXISTS song_moods (
-    mood_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    popularity INT,
-    energy INT,
-    danceability INT,
-    positiveness INT,
-    speechiness INT,
-    liveness INT,
-    acousticness INT,
-    instrumentalness INT,
-    song_id BIGINT NOT NULL,
+    mood_id BIGINT AUTO_INCREMENT PRIMARY KEY,        
+    popularity INT,                             
+    energy INT,                                 
+    danceability INT,                            
+    positiveness INT,                            
+    speechiness INT,                             
+    liveness INT,                               
+    acousticness INT,                           
+    instrumentalness INT,                       
+    song_id BIGINT NOT NULL,                     
     CONSTRAINT fk_mood_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS listen_contexts (
-    context_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    party BOOLEAN DEFAULT FALSE,
-    work_or_study BOOLEAN DEFAULT FALSE,
-    relaxation_or_meditation BOOLEAN DEFAULT FALSE,
-    exercise BOOLEAN DEFAULT FALSE,
-    running BOOLEAN DEFAULT FALSE,
-    yoga_stretching BOOLEAN DEFAULT FALSE,
-    driving BOOLEAN DEFAULT FALSE,
-    social_gathering BOOLEAN DEFAULT FALSE,
-    morning_routine BOOLEAN DEFAULT FALSE,
-    song_id BIGINT NOT NULL,
+    context_id BIGINT AUTO_INCREMENT PRIMARY KEY,         
+    party BOOLEAN DEFAULT FALSE,                 
+    work_or_study BOOLEAN DEFAULT FALSE,             
+    relaxation_or_meditation BOOLEAN DEFAULT FALSE,  
+    exercise BOOLEAN DEFAULT FALSE,               
+    running BOOLEAN DEFAULT FALSE,             
+    yoga_stretching BOOLEAN DEFAULT FALSE,        
+    driving BOOLEAN DEFAULT FALSE,                
+    social_gathering BOOLEAN DEFAULT FALSE,       
+    morning_routine BOOLEAN DEFAULT FALSE,        
+    song_id BIGINT NOT NULL,                      
     CONSTRAINT fk_context_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS similar_songs (
-    similar_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    similar_id BIGINT AUTO_INCREMENT PRIMARY KEY,        
     similar_artist TEXT NOT NULL,
-    similar_song VARCHAR(255) NOT NULL,
-    similar_score DOUBLE,
-    song_id BIGINT NOT NULL,
+    similar_song VARCHAR(255) NOT NULL,          
+    similar_score DOUBLE,                        
+    song_id BIGINT NOT NULL,                     
     CONSTRAINT fk_similar_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE

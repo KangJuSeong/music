@@ -10,9 +10,14 @@ logging:
     com:
       example:
         music: debug
-    org:
-      springframework:
-        r2dbc: debug
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics,prometheus" # prometheus는 추후 시각화에 유용합니다
+  endpoint:
+    metrics:
+      access: READ_ONLY
 resource:
   json:
     path: path

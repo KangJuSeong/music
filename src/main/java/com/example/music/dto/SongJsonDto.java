@@ -3,6 +3,7 @@ package com.example.music.dto;
 import com.example.music.dto.deserializer.SimilarSongDeserializer;
 import com.example.music.dto.deserializer.YesNoBooleanDeserializer;
 import com.example.music.dto.deserializer.ZeroOneBooleanDeserializer;
+import com.example.music.entity.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class MusicJsonDto {
+public class SongJsonDto {
     @JsonProperty("Artist(s)")
     private String artist;
     @JsonProperty("song")
@@ -86,5 +87,69 @@ public class MusicJsonDto {
     private boolean morningRoutine;
     @JsonDeserialize(contentUsing = SimilarSongDeserializer.class)
     @JsonProperty("Similar Songs")
-    private List<SimilarSong> similarSongs;
+    private List<SimilarSongJsonDto> similarSongs;
+
+    public SongEntity toSongEntity(Long albumId, Long artistId) {
+        return SongEntity.builder()
+                .songName(song)
+                .genre(genre)
+                .length(length)
+                .explicit(explicit)
+                .lyrics(lyrics)
+                .artistId(artistId)
+                .albumId(albumId)
+                .build();
+    }
+
+    public AlbumEntity toAlbumEntity() {
+        return AlbumEntity.builder()
+                .albumName(album)
+                .releaseDate(releaseDate)
+                .build();
+    }
+
+    public ArtistEntity toArtistEntity(String artistName) {
+        return ArtistEntity.builder()
+                .artistName(artistName)
+                .build();
+    }
+
+    public SongFeatureEntity toSongFeatureEntity(Long songId) {
+        return SongFeatureEntity.builder()
+                .emotion(emotion)
+                .keySignature(keySignature)
+                .timeSignature(timeSignature)
+                .tempo(tempo)
+                .loudness(loudness)
+                .songId(songId)
+                .build();
+    }
+
+    public SongMoodEntity toSongMoodEntity(Long songId) {
+        return SongMoodEntity.builder()
+                .popularity(popularity)
+                .energy(energy)
+                .danceability(danceability)
+                .speechiness(speechiness)
+                .liveness(liveness)
+                .acousticness(acousticness)
+                .instrumentalness(instrumentalness)
+                .songId(songId)
+                .build();
+    }
+
+    public ListenContextEntity toListenContextEntity(Long songId) {
+        return ListenContextEntity.builder()
+                .party(party)
+                .workOrStudy(workOrStudy)
+                .relaxationOrMeditation(relaxationOrMeditation)
+                .exercise(exercise)
+                .running(running)
+                .yogaStretching(yogaOrStretching)
+                .driving(driving)
+                .socialGathering(socialGatherings)
+                .morningRoutine(morningRoutine)
+                .songId(songId)
+                .build();
+    }
 }
