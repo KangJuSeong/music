@@ -1,66 +1,102 @@
-DROP TABLE IF EXISTS songs;
 DROP TABLE IF EXISTS song_features;
 DROP TABLE IF EXISTS listening_contexts;
+DROP TABLE IF EXISTS song_moods;
 DROP TABLE IF EXISTS similar_songs;
+DROP TABLE IF EXISTS artists_albums;
+DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS artists;
+DROP TABLE IF EXISTS albums;
 
-
-CREATE TABLE songs (
-    song_id BIGINT AUTO_INCREMENT PRIMARY KEY,   -- PK, 자동 증가
-    artist VARCHAR(255) NOT NULL,                -- 가수
-    song VARCHAR(255) NOT NULL,                  -- 곡명
-    length VARCHAR(10),                          -- 곡 길이 (ex: 03:47)
-    emotion VARCHAR(50),                         -- 곡 감성
-    genre VARCHAR(50),                           -- 장르
-    album VARCHAR(255),                          -- 앨범명
-    key_signature VARCHAR(10),                   -- 음높이 (key)
-    tempo DOUBLE,                                -- 템포
-    loudness DOUBLE,                             -- 데시벨
-    time_signature VARCHAR(10),                  -- 박자 (ex: 4/4)
-    explicit BOOLEAN,                            -- 노골적인 가사 포함 여부
-    release_date DATE,                           -- 발매일
-    lyrics TEXT                                  -- 가사
+CREATE TABLE IF NOT EXISTS albums (
+    album_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    album_name VARCHAR(255),
+    release_date DATE
 );
 
-CREATE TABLE song_features (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,        -- PK, 자동 증가
-    popularity INT,                              -- 인기도 (1~100)
-    energy INT,                                  -- 에너지 (1~100)
-    danceability INT,                            -- 댄싱 적합성 (1~100)
-    positiveness INT,                            -- 긍정도 (1~100)
-    speechiness INT,                             -- 구어체 비중 (1~100)
-    liveness INT,                                -- 현장감 (1~100)
-    acousticness INT,                            -- 어쿠스틱감 (1~100)
-    instrumentalness INT,                        -- 연주 비중 (1~100)
-    song_id BIGINT NOT NULL,                     -- FK
-    CONSTRAINT fk_song_features FOREIGN KEY (song_id) REFERENCES songs(song_id)
+CREATE TABLE IF NOT EXISTS artists (
+    artist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    artist_name LONGTEXT
+);
+
+CREATE TABLE IF NOT EXISTS songs (
+    song_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    song_name VARCHAR(255),
+    genre VARCHAR(255),
+    length VARCHAR(10),
+    explicit BOOLEAN DEFAULT FALSE,
+    lyrics LONGTEXT,
+    artist_id BIGINT NOT NULL,
+    album_id BIGINT NOT NULL,
+    CONSTRAINT fk_song_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_song_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
-CREATE TABLE listening_contexts (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,         -- PK
-    party BOOLEAN DEFAULT FALSE,                  -- 파티에 적합
-    work_study BOOLEAN DEFAULT FALSE,             -- 공부/업무에 적합
-    relaxation_meditation BOOLEAN DEFAULT FALSE,  -- 명상에 적합
-    exercise BOOLEAN DEFAULT FALSE,               -- 운동에 적합
-    running BOOLEAN DEFAULT FALSE,                -- 러닝에 적합
-    yoga_stretching BOOLEAN DEFAULT FALSE,        -- 요가/스트레칭에 적합
-    driving BOOLEAN DEFAULT FALSE,                -- 드라이브에 적합
-    social_gathering BOOLEAN DEFAULT FALSE,       -- 모임에 적합
-    morning_routine BOOLEAN DEFAULT FALSE,        -- 아침 루틴에 적합
-    song_id BIGINT NOT NULL,                      -- FK
-    CONSTRAINT fk_song_listening_contexts FOREIGN KEY (song_id) REFERENCES songs(song_id)
+CREATE TABLE IF NOT EXISTS artists_albums (
+    split_artist_name VARCHAR(255),
+    album_id BIGINT,
+    PRIMARY KEY (split_artist_name, album_id),
+    CONSTRAINT fk_aa_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
-CREATE TABLE similar_songs (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,        -- PK
-    similar_artist VARCHAR(255) NOT NULL,        -- 유사곡 아티스트
-    similar_song VARCHAR(255) NOT NULL,          -- 유사곡 이름
-    similar_score DOUBLE,                        -- 유사도
-    song_id BIGINT NOT NULL,                     -- FK
-    CONSTRAINT fk_song_similar FOREIGN KEY (song_id) REFERENCES songs(song_id)
+CREATE TABLE IF NOT EXISTS song_features (
+    feature_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    emotion VARCHAR(255),
+    key_signature VARCHAR(10),
+    time_signature VARCHAR(10),
+    tempo DOUBLE,
+    loudness DOUBLE,
+    song_id BIGINT NOT NULL,
+    CONSTRAINT fk_feature_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS song_moods (
+    mood_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    popularity INT,
+    energy INT,
+    danceability INT,
+    positiveness INT,
+    speechiness INT,
+    liveness INT,
+    acousticness INT,
+    instrumentalness INT,
+    song_id BIGINT NOT NULL,
+    CONSTRAINT fk_mood_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS listen_contexts (
+    context_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    party BOOLEAN DEFAULT FALSE,
+    work_or_study BOOLEAN DEFAULT FALSE,
+    relaxation_or_meditation BOOLEAN DEFAULT FALSE,
+    exercise BOOLEAN DEFAULT FALSE,
+    running BOOLEAN DEFAULT FALSE,
+    yoga_stretching BOOLEAN DEFAULT FALSE,
+    driving BOOLEAN DEFAULT FALSE,
+    social_gathering BOOLEAN DEFAULT FALSE,
+    morning_routine BOOLEAN DEFAULT FALSE,
+    song_id BIGINT NOT NULL,
+    CONSTRAINT fk_context_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS similar_songs (
+    similar_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    similar_artist TEXT NOT NULL,
+    similar_song VARCHAR(255) NOT NULL,
+    similar_score DOUBLE,
+    song_id BIGINT NOT NULL,
+    CONSTRAINT fk_similar_song FOREIGN KEY (song_id) REFERENCES songs(song_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
