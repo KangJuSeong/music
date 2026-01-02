@@ -69,32 +69,11 @@ public class MusicSyncService {
                 .concatMap(dto -> {
                     MusicSyncContext ctx = new MusicSyncContext(dto);
                     // artist, album 등록 시 연관이 없으므로 병렬 처리
-                    return Mono.zip(
-                            getOrSaveArtist(ctx).doOnError(th -> log.error("Fail insert artists - {}", ctx)),
-                            getOrSaveAlbum(ctx).doOnError(th -> log.error("Fail insert song - {}", ctx))
-                    )
-                    .thenReturn(ctx);
+                    return Mono.zip(getOrSaveArtist(ctx), getOrSaveAlbum(ctx))
+                            .thenReturn(ctx);
                 })
-                .flatMap(ctx ->
-                        // song 저장
-                        songRepository.save(ctx.getDto().toSongEntity(ctx.getAlbumId(), ctx.getArtistId()))
-                        .flatMap(song -> {
-                            SongJsonDto dto = ctx.getDto();
-                            Long songId = song.getSongId();
-                            ctx.setSongId(songId);
-                            // song 연관 entity(feature, mood, listenContext, similarSong), artist-album 저장 병렬 처리
-                            return Mono.when(
-                                    songFeatureRepository.save(dto.toSongFeatureEntity(songId))
-                                            .doOnError(th -> log.error("Fail insert feature - {}", ctx)),
-                                    songMoodRepository.save(dto.toSongMoodEntity(songId))
-                                            .doOnError(th -> log.error("Fail insert mood - {}", ctx)),
-                                    listenContextRepository.save(dto.toListenContextEntity(songId))
-                                            .doOnError(th -> log.error("Fail insert listen context - {}", ctx)),
-                                    saveSimilarSongs(ctx),
-                                    saveArtistsAlbums(ctx)
-                            );
-                        })
-                , 60)
+                .flatMap(ctx -> Mono.when(saveArtistsAlbums(ctx), saveSongAndRelationEntities(ctx)),
+                        60)
                 .doFinally(signalType -> {
                     log.debug("Finish sync music data");
                     artistCache.clear();
@@ -133,6 +112,25 @@ public class MusicSyncService {
                     return ctx;
                 })
                 .doOnError(th -> log.error("Fail insert album - {}", ctx));
+    }
+
+    public Mono<Void> saveSongAndRelationEntities(MusicSyncContext ctx) {
+        return songRepository.save(ctx.getDto().toSongEntity(ctx.getAlbumId(), ctx.getArtistId()))
+                .flatMap(song -> {
+                    SongJsonDto dto = ctx.getDto();
+                    Long songId = song.getSongId();
+                    ctx.setSongId(songId);
+                    // song 연관 entity(feature, mood, listenContext, similarSong), artist-album 저장 병렬 처리
+                    return Mono.when(
+                            songFeatureRepository.save(dto.toSongFeatureEntity(songId))
+                                    .doOnError(th -> log.error("Fail insert feature - {}", ctx)),
+                            songMoodRepository.save(dto.toSongMoodEntity(songId))
+                                    .doOnError(th -> log.error("Fail insert mood - {}", ctx)),
+                            listenContextRepository.save(dto.toListenContextEntity(songId))
+                                    .doOnError(th -> log.error("Fail insert listen context - {}", ctx)),
+                            saveSimilarSongs(ctx)
+                    );
+                });
     }
 
     public Flux<ArtistAlbumEntity> saveArtistsAlbums(MusicSyncContext ctx) {
