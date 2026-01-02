@@ -95,13 +95,13 @@ public class MusicSyncService {
                             );
                         })
                 , 60)
-                .then(Mono.fromRunnable(() -> {
+                .doFinally(signalType -> {
                     log.debug("Finish sync music data");
                     artistCache.clear();
                     albumCache.clear();
                     artistAlbumCache.clear();
                 })
-        );
+                .then();
     }
 
     public Mono<MusicSyncContext> getOrSaveArtist(MusicSyncContext ctx) {
@@ -139,17 +139,17 @@ public class MusicSyncService {
         Long albumId = ctx.getAlbumId();
         String albumIdToString = albumId.toString();
         String artistName = ctx.getDto().getArtist();
-        List<ArtistAlbumEntity> splitArtistNames = Arrays.stream(artistName.trim().split(","))
+        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(artistName.trim().split(","))
                 .filter(sa -> artistAlbumCache.add(sa + "|" + albumIdToString))
                 .map(sa -> new ArtistAlbumEntity(sa, albumId))
                 .toList();
-        return artistAlbumRepository.saveAll(splitArtistNames)
+        return artistAlbumRepository.saveAll(artistAlbumEntities)
                 .onErrorResume(th -> {
                     if (th instanceof DuplicateKeyException) {
                         log.debug("Duplicate key insert for artist album");
                         return Mono.empty();
                     } else {
-                        log.error("Fail insert artist album - {}", splitArtistNames);
+                        log.error("Fail insert artist album - {}", artistAlbumEntities);
                         return Mono.error(th);
                     }
                 });

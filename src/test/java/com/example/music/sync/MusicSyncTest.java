@@ -3,7 +3,9 @@ package com.example.music.sync;
 import com.example.music.dto.MusicSyncContext;
 import com.example.music.dto.SongJsonDto;
 import com.example.music.entity.AlbumEntity;
+import com.example.music.entity.ArtistAlbumEntity;
 import com.example.music.entity.ArtistEntity;
+import com.example.music.entity.SimilarSongEntity;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
 import com.example.music.repository.song.SongRepository;
@@ -16,19 +18,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,6 +68,7 @@ public class MusicSyncTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     void setUp() {
         musicSyncService = new MusicSyncService(
                 dataInitializer,
@@ -169,5 +180,91 @@ public class MusicSyncTest {
         StepVerifier.create(result)
                 .expectNextMatches(c -> c.getAlbumId().equals(albumId))
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("캐시 히트 시 DB에 아티스트-앨범을 INSERT 하지 않는다.")
+    void shouldNotInsertToDatabaseForArtistAlbumWhenCacheHit() throws JsonProcessingException {
+        // given: JSON DTO, MusicContextDto, Album ID, Artist Cache, ArgumentCaptor<List<ArtistEntity>> 
+        SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
+        Long albumId = 1L;
+        MusicSyncContext ctx = new MusicSyncContext(dto);
+        ctx.setAlbumId(albumId);
+        ArgumentCaptor<List<ArtistAlbumEntity>> artistAlbumCaptor = ArgumentCaptor.forClass(List.class);
+        Arrays.stream(dto.getArtist().split(",")).forEach(sa -> reflectArtistAlbumCache.add(sa + "|" + albumId.toString()));
+        when(artistAlbumRepository.saveAll(anyList()))
+                .thenReturn(Flux.empty());
+
+        // when
+        Flux<ArtistAlbumEntity> result = musicSyncService.saveArtistsAlbums(ctx);
+
+        // then
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+        verify(artistAlbumRepository).saveAll(artistAlbumCaptor.capture());
+        assertEquals(artistAlbumCaptor.getValue().size(), 0);
+    }
+
+    @Test
+    @DisplayName("캐시 미스 시 DB에 아티스트-앨범을 INSERT 한다.")
+    void shouldInsertToDatabaseAndCacheForArtistAlbumWhenCacheMiss() throws JsonProcessingException {
+        // given: JSON DTO, Album ID, MusicSyncContext, ArgumentCaptor<List<ArtistAlbumEntity>>, List<ArtistAlubmEntity>> 
+        SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
+        Long albumId = 1L;
+        MusicSyncContext ctx = new MusicSyncContext(dto);
+        ctx.setAlbumId(albumId);
+        ArgumentCaptor<List<ArtistAlbumEntity>> artistAlbumCaptor = ArgumentCaptor.forClass(List.class);
+        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(dto.getArtist().trim().split(","))
+                .map(sa -> new ArtistAlbumEntity(sa, albumId))
+                .toList();
+        when(artistAlbumRepository.saveAll(anyList())).thenReturn(Flux.fromIterable(artistAlbumEntities));
+
+        // when
+        Flux<ArtistAlbumEntity> result = musicSyncService.saveArtistsAlbums(ctx);
+
+        // then
+        StepVerifier.create(result)
+                .expectNextCount(artistAlbumEntities.size())
+                .verifyComplete();
+        verify(artistAlbumRepository).saveAll(artistAlbumCaptor.capture());
+        List<ArtistAlbumEntity> filterdArtistAlbumEntities = artistAlbumCaptor.getValue();
+        assertEquals(artistAlbumEntities.stream().map(ArtistAlbumEntity::getAlbumId).toList(), 
+                     filterdArtistAlbumEntities.stream().map(ArtistAlbumEntity::getAlbumId).toList());
+        assertEquals(artistAlbumEntities.stream().map(ArtistAlbumEntity::getSplitArtistName).toList(), 
+                     filterdArtistAlbumEntities.stream().map(ArtistAlbumEntity::getSplitArtistName).toList());
+        artistAlbumEntities.forEach(entity -> {
+            String key = entity.getSplitArtistName() + "|" + entity.getAlbumId().toString();
+            assertFalse(reflectArtistAlbumCache.add(key));
+        });
+    }
+
+    @Test
+    @DisplayName("유사곡 목록에서 유사곡명 또는 유사곡 아티스트가 NULL인 데이터를 필터링 한다.")
+    void shoudExcludeInsertNullDataForArtistOrSong() throws JsonProcessingException {
+        // given: JSON DTO, MusicSyncContext, Song ID 
+        SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
+        Long songId = 1L;
+        MusicSyncContext ctx = new MusicSyncContext(dto);
+        // 첫번째 유사곡은 아티스트 null, 두번째 유사곡은 곡명 null 로 저장
+        dto.getSimilarSongs().get(0).setSimilarArtist(null);
+        dto.getSimilarSongs().get(1).setSimilarSong(null);
+        ctx.setSongId(songId);
+        when(similarSongRepository.saveAll(anyList())).thenReturn(Flux.empty());
+        ArgumentCaptor<List<SimilarSongEntity>> captor = ArgumentCaptor.forClass(List.class);
+
+        // when
+        Flux<SimilarSongEntity> result = musicSyncService.saveSimilarSongs(ctx);
+
+        // then
+        StepVerifier.create(result)
+                .verifyComplete();
+        verify(similarSongRepository).saveAll(captor.capture());
+        List<SimilarSongEntity> filterdSimilarSongs = captor.getValue();
+        assertEquals(1, filterdSimilarSongs.size());
+        SimilarSongEntity filterdSimilarSong = filterdSimilarSongs.getFirst();
+        assertEquals(dto.getSimilarSongs().getLast().getSimilarSong(), filterdSimilarSong.getSimilarSong());
+        assertEquals(dto.getSimilarSongs().getLast().getSimilarArtist(), filterdSimilarSong.getSimilarArtist());
+        assertEquals(dto.getSimilarSongs().getLast().getSimilarScore(), filterdSimilarSong.getSimilarScore());
     }
 }
