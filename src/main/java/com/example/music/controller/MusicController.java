@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/music")
+@RequestMapping("/music/sync")
 @Slf4j
 public class MusicController {
     private final MusicSyncService songService;
@@ -17,7 +17,7 @@ public class MusicController {
         this.songService = songService;
     }
 
-    @GetMapping("/init")
+    @GetMapping
     public Mono<Void> initializeMusic() {
         log.debug("Request initialize music data");
         return songService.syncMusicData();

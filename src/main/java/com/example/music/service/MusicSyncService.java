@@ -6,7 +6,7 @@ import com.example.music.entity.ArtistAlbumEntity;
 import com.example.music.entity.SimilarSongEntity;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
-import com.example.music.repository.AlbumRepository;
+import com.example.music.repository.album.AlbumRepository;
 import com.example.music.repository.song.SongRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
