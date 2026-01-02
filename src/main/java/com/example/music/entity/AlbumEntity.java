@@ -16,4 +16,5 @@ public class AlbumEntity {
     private Long albumId;
     private String albumName;
     private LocalDate releaseDate;
+    private String releaseYear;
 }

@@ -105,6 +105,7 @@ public class SongJsonDto {
         return AlbumEntity.builder()
                 .albumName(album)
                 .releaseDate(releaseDate)
+                .releaseYear(releaseDate != null ? String.valueOf(releaseDate.getYear()) : null)
                 .build();
     }
 
