@@ -2,10 +2,7 @@ package com.example.music.sync;
 
 import com.example.music.dto.MusicSyncContext;
 import com.example.music.dto.SongJsonDto;
-import com.example.music.entity.AlbumEntity;
-import com.example.music.entity.ArtistAlbumEntity;
-import com.example.music.entity.ArtistEntity;
-import com.example.music.entity.SimilarSongEntity;
+import com.example.music.entity.*;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
 import com.example.music.repository.song.SongRepository;
@@ -68,7 +65,6 @@ public class MusicSyncTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
         musicSyncService = new MusicSyncService(
                 dataInitializer,
@@ -211,11 +207,13 @@ public class MusicSyncTest {
     void shouldInsertToDatabaseAndCacheForArtistAlbumWhenCacheMiss() throws JsonProcessingException {
         // given: JSON DTO, Album ID, MusicSyncContext, ArgumentCaptor<List<ArtistAlbumEntity>>, List<ArtistAlubmEntity>> 
         SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
+        dto.setArtist("Artist1, Artist2 , Artist3");
         Long albumId = 1L;
         MusicSyncContext ctx = new MusicSyncContext(dto);
         ctx.setAlbumId(albumId);
         ArgumentCaptor<List<ArtistAlbumEntity>> artistAlbumCaptor = ArgumentCaptor.forClass(List.class);
-        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(dto.getArtist().trim().split(","))
+        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(dto.getArtist().split(","))
+                .map(String::trim)
                 .map(sa -> new ArtistAlbumEntity(sa, albumId))
                 .toList();
         when(artistAlbumRepository.saveAll(anyList())).thenReturn(Flux.fromIterable(artistAlbumEntities));
@@ -241,7 +239,7 @@ public class MusicSyncTest {
 
     @Test
     @DisplayName("유사곡 목록에서 유사곡명 또는 유사곡 아티스트가 NULL인 데이터를 필터링 한다.")
-    void shoudExcludeInsertNullDataForArtistOrSong() throws JsonProcessingException {
+    void shouldExcludeInsertNullDataForArtistOrSong() throws JsonProcessingException {
         // given: JSON DTO, MusicSyncContext, Song ID 
         SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
         Long songId = 1L;
@@ -262,9 +260,9 @@ public class MusicSyncTest {
         verify(similarSongRepository).saveAll(captor.capture());
         List<SimilarSongEntity> filterdSimilarSongs = captor.getValue();
         assertEquals(1, filterdSimilarSongs.size());
-        SimilarSongEntity filterdSimilarSong = filterdSimilarSongs.getFirst();
-        assertEquals(dto.getSimilarSongs().getLast().getSimilarSong(), filterdSimilarSong.getSimilarSong());
-        assertEquals(dto.getSimilarSongs().getLast().getSimilarArtist(), filterdSimilarSong.getSimilarArtist());
-        assertEquals(dto.getSimilarSongs().getLast().getSimilarScore(), filterdSimilarSong.getSimilarScore());
+        SimilarSongEntity filteredSimilarSong  = filterdSimilarSongs.getFirst();
+        assertEquals(dto.getSimilarSongs().getLast().getSimilarSong(), filteredSimilarSong.getSimilarSong());
+        assertEquals(dto.getSimilarSongs().getLast().getSimilarArtist(), filteredSimilarSong.getSimilarArtist());
+        assertEquals(dto.getSimilarSongs().getLast().getSimilarScore(), filteredSimilarSong.getSimilarScore());
     }
 }

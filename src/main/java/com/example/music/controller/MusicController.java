@@ -20,6 +20,6 @@ public class MusicController {
     @GetMapping("/init")
     public Mono<Void> initializeMusic() {
         log.debug("Request initialize music data");
-        return songService.syncMusicMetadata();
+        return songService.syncMusicData();
     }
 }
