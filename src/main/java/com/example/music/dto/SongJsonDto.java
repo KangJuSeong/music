@@ -108,9 +108,9 @@ public class SongJsonDto {
                 .build();
     }
 
-    public ArtistEntity toArtistEntity(String artistName) {
+    public ArtistEntity toArtistEntity() {
         return ArtistEntity.builder()
-                .artistName(artistName)
+                .artistName(artist)
                 .build();
     }
 
