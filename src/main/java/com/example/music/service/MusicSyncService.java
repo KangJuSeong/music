@@ -62,7 +62,7 @@ public class MusicSyncService {
     }
 
     @Transactional
-    public Mono<Void> syncMusicMetadata() {
+    public Mono<Void> syncMusicData() {
         log.debug("Start sync music data");
         return dataInitializer.streamJsonToDto(jsonFile)
                 // artist, album 저장
@@ -139,7 +139,8 @@ public class MusicSyncService {
         Long albumId = ctx.getAlbumId();
         String albumIdToString = albumId.toString();
         String artistName = ctx.getDto().getArtist();
-        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(artistName.trim().split(","))
+        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(artistName.split(","))
+                .map(String::trim)
                 .filter(sa -> artistAlbumCache.add(sa + "|" + albumIdToString))
                 .map(sa -> new ArtistAlbumEntity(sa, albumId))
                 .toList();
