@@ -13,9 +13,9 @@ public interface AlbumRepository extends ReactiveCrudRepository<AlbumEntity, Lon
             "FROM albums " +
             "GROUP BY release_year " +
             "HAVING release_year IS NOT NULL " +
-            "ORDER BY release_year DESC " +
+            "ORDER BY :sortBy :direction " +
             "LIMIT :limit OFFSET :offset")
-    Flux<YearlyAlbumCountDto> findYearlyAlbumCounts(int limit, long offset);
+    Flux<YearlyAlbumCountDto> findYearlyAlbumCounts(int limit, long offset, String sortBy, String direction);
 
     @Query("SELECT COUNT(DISTINCT release_year) FROM albums WHERE release_year IS NOT NULL")
     Mono<Long> countDistinctYearForAlbums();
