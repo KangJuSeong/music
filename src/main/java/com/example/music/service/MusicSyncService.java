@@ -72,8 +72,7 @@ public class MusicSyncService {
                     return Mono.zip(getOrSaveArtist(ctx), getOrSaveAlbum(ctx))
                             .thenReturn(ctx);
                 })
-                .flatMap(ctx -> Mono.when(saveArtistsAlbums(ctx), saveSongAndRelationEntities(ctx)),
-                        60)
+                .flatMap(ctx -> Mono.when(saveArtistsAlbums(ctx), saveSongAndRelationEntities(ctx)), 60)
                 .doFinally(signalType -> {
                     log.debug("Finish sync music data");
                     artistCache.clear();
