@@ -16,7 +16,6 @@ public class IndexInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         IndexInfo[] indexInfos = new IndexInfo[] {
-                new IndexInfo("idx_split_artist_name", "artists_albums", "split_artist_name"),
                 new IndexInfo("idx_release_year", "albums", "release_year")
         };
 

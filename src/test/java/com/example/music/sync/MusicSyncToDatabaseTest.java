@@ -4,6 +4,8 @@ import com.example.music.dto.SongJsonDto;
 import com.example.music.entity.*;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
+import com.example.music.repository.album.AlbumRepository;
+import com.example.music.repository.artist.ArtistRepository;
 import com.example.music.repository.song.SongRepository;
 import com.example.music.service.MusicSyncService;
 import com.example.music.statics.StaticTestDataRepository;
@@ -11,19 +13,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -55,12 +60,20 @@ public class MusicSyncToDatabaseTest {
     SimilarSongRepository similarSongRepository;
     @Autowired
     MusicSyncService musicSyncService;
+    @Autowired
+    DatabaseClient client;
     ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @AfterEach
+    void tearDown() {
+        client.sql("DELETE FROM albums").fetch().rowsUpdated().block();
+        client.sql("DELETE FROM artists").fetch().rowsUpdated().block();
     }
 
     @Test
@@ -76,85 +89,75 @@ public class MusicSyncToDatabaseTest {
 
         // then
         StepVerifier.create(result).verifyComplete();
-        verifyAlbum(dto.toAlbumEntity());
-        verifyArtist(dto.toArtistEntity());
-        verifySong(dto.toSongEntity(1L, 1L));
-        verifySongFeature(dto.toSongFeatureEntity(1L));
-        verifySongMood(dto.toSongMoodEntity(1L));
-        verifyListenContext(dto.toListenContextEntity(1L));
+        Long albumId = verifyAlbum(dto.toAlbumEntity());
+        Long artistId = verifyArtist(dto.toArtistEntity());
+        Long songId = verifySong(dto.toSongEntity(albumId, artistId));
+        verifySongFeature(dto.toSongFeatureEntity(songId));
+        verifySongMood(dto.toSongMoodEntity(songId));
+        verifyListenContext(dto.toListenContextEntity(songId));
         List<SimilarSongEntity> similarSongEntities = dto.getSimilarSongs().stream()
-                .map(s -> s.toSimilarSongEntity(1L))
+                .map(s -> s.toSimilarSongEntity(songId))
                 .toList();
         verifySimilarSong(similarSongEntities);
-        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(dto.getArtist().split(","))
-                .map(String::trim)
-                .map(sa -> new ArtistAlbumEntity(sa, 1L))
-                .toList();
-        verifyArtistAlbum(artistAlbumEntities);
+        verifyArtistAlbum(new ArtistAlbumEntity(artistId, albumId));
     }
 
-    private void verifyAlbum(AlbumEntity expect) {
-        AlbumEntity albumEntity = albumRepository.findById(1L).block();
+    private Long verifyAlbum(AlbumEntity expect) {
+        AlbumEntity albumEntity = albumRepository.findAll().blockFirst();
         assert albumEntity != null;
-        assertEquals(1L, albumEntity.getAlbumId());
         Assertions.assertThat(albumEntity)
                 .usingRecursiveComparison()
                 .ignoringFields("albumId")
                 .isEqualTo(expect);
+        return albumEntity.getAlbumId();
     }
 
-    private void verifyArtist(ArtistEntity expect) {
-        ArtistEntity artistEntity = artistRepository.findById(1L).block();
+    private Long verifyArtist(ArtistEntity expect) {
+        ArtistEntity artistEntity = artistRepository.findAll().blockFirst();
         assert artistEntity != null;
-        assertEquals(1L, artistEntity.getArtistId());
         Assertions.assertThat(artistEntity)
                 .usingRecursiveComparison()
                 .ignoringFields("artistId")
                 .isEqualTo(expect);
+        return artistEntity.getArtistId();
     }
 
-    private void verifySong(SongEntity expect) {
-        SongEntity songEntity = songRepository.findById(1L).block();
+    private Long verifySong(SongEntity expect) {
+        SongEntity songEntity = songRepository.findAll().blockFirst();
         assert songEntity != null;
-        assertEquals(1L, songEntity.getSongId());
-        assertEquals(1L, songEntity.getArtistId());
-        assertEquals(1L, songEntity.getAlbumId());
         Assertions.assertThat(songEntity)
                 .usingRecursiveComparison()
-                .ignoringFields("songId", "artistId", "albumId")
+                .ignoringFields("songId")
                 .isEqualTo(expect);
+        return songEntity.getSongId();
     }
 
     private void verifySongFeature(SongFeatureEntity expect) {
-        SongFeatureEntity songFeatureEntity = songFeatureRepository.findById(1L).block();
+        SongFeatureEntity songFeatureEntity = songFeatureRepository.findAll().blockFirst();
         assert songFeatureEntity != null;
-        assertEquals(1L, songFeatureEntity.getFeatureId());
         assertEquals(1L, songFeatureEntity.getSongId());
         Assertions.assertThat(songFeatureEntity)
                 .usingRecursiveComparison()
-                .ignoringFields("featureId", "songId")
+                .ignoringFields("featureId")
                 .isEqualTo(expect);
     }
 
     private void verifySongMood(SongMoodEntity expect) {
-        SongMoodEntity songMoodEntity = songMoodRepository.findById(1L).block();
+        SongMoodEntity songMoodEntity = songMoodRepository.findAll().blockFirst();
         assert songMoodEntity != null;
-        assertEquals(1L, songMoodEntity.getMoodId());
         assertEquals(1L, songMoodEntity.getSongId());
         Assertions.assertThat(songMoodEntity)
                 .usingRecursiveComparison()
-                .ignoringFields("moodId", "songId")
+                .ignoringFields("moodId")
                 .isEqualTo(expect);
     }
 
     private void verifyListenContext(ListenContextEntity expect) {
-        ListenContextEntity listenContextEntity = listenContextRepository.findById(1L).block();
+        ListenContextEntity listenContextEntity = listenContextRepository.findAll().blockFirst();
         assert listenContextEntity != null;
-        assertEquals(1L, listenContextEntity.getContextId());
-        assertEquals(1L, listenContextEntity.getSongId());
         Assertions.assertThat(listenContextEntity)
                 .usingRecursiveComparison()
-                .ignoringFields("contextId", "songId")
+                .ignoringFields("contextId")
                 .isEqualTo(expect);
     }
 
@@ -167,15 +170,15 @@ public class MusicSyncToDatabaseTest {
             assertEquals(1L, similar.getSongId());
         });
         Assertions.assertThat(similarSongEntities)
-                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("similarId", "songId")
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("similarId")
                 .containsAll(expects);
     }
 
-    private void verifyArtistAlbum(List<ArtistAlbumEntity> expects) {
-        List<ArtistAlbumEntity> artistAlbumEntities = artistAlbumRepository.findAll().collectList().block();
+    private void verifyArtistAlbum(ArtistAlbumEntity expect) {
+        ArtistAlbumEntity artistAlbumEntities = artistAlbumRepository.findAll().blockFirst();
         assert artistAlbumEntities != null;
         Assertions.assertThat(artistAlbumEntities)
-                .usingRecursiveFieldByFieldElementComparator()
-                .isEqualTo(expects);
+                .usingRecursiveComparison()
+                .isEqualTo(expect);
     }
 }

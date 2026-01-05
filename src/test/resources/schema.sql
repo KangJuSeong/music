@@ -3,9 +3,9 @@ DROP TABLE IF EXISTS listening_contexts;
 DROP TABLE IF EXISTS song_moods;
 DROP TABLE IF EXISTS similar_songs;
 DROP TABLE IF EXISTS artists_albums;
-DROP TABLE IF EXISTS songs;
-DROP TABLE IF EXISTS artists;
-DROP TABLE IF EXISTS albums;
+DROP TABLE IF EXISTS songs CASCADE;
+DROP TABLE IF EXISTS artists CASCADE;
+DROP TABLE IF EXISTS albums CASCADE;
 
 CREATE TABLE IF NOT EXISTS albums (
     album_id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -37,10 +37,13 @@ CREATE TABLE IF NOT EXISTS songs (
 );
 
 CREATE TABLE IF NOT EXISTS artists_albums (
-    split_artist_name VARCHAR(255),
+    artist_id BIGINT,
     album_id BIGINT,
-    PRIMARY KEY (split_artist_name, album_id),
+    PRIMARY KEY (artist_id, album_id),
     CONSTRAINT fk_aa_album FOREIGN KEY (album_id) REFERENCES albums(album_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fs_aa_artist FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
