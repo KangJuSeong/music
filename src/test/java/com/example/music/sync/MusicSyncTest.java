@@ -6,6 +6,7 @@ import com.example.music.entity.*;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
 import com.example.music.repository.album.AlbumRepository;
+import com.example.music.repository.artist.ArtistRepository;
 import com.example.music.repository.song.SongRepository;
 import com.example.music.service.MusicSyncService;
 import com.example.music.statics.StaticTestDataRepository;
@@ -185,22 +186,18 @@ public class MusicSyncTest {
         // given: JSON DTO, MusicContextDto, Album ID, Artist Cache, ArgumentCaptor<List<ArtistEntity>> 
         SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
         Long albumId = 1L;
+        Long artistId = 1L;
         MusicSyncContext ctx = new MusicSyncContext(dto);
         ctx.setAlbumId(albumId);
-        ArgumentCaptor<List<ArtistAlbumEntity>> artistAlbumCaptor = ArgumentCaptor.forClass(List.class);
-        Arrays.stream(dto.getArtist().split(",")).forEach(sa -> reflectArtistAlbumCache.add(sa + "|" + albumId.toString()));
-        when(artistAlbumRepository.saveAll(anyList()))
-                .thenReturn(Flux.empty());
+        ctx.setArtistId(artistId);
+        reflectArtistAlbumCache.add(artistId + "|" + albumId);
 
         // when
-        Flux<ArtistAlbumEntity> result = musicSyncService.saveArtistsAlbums(ctx);
+        Mono<ArtistAlbumEntity> result = musicSyncService.saveArtistsAlbums(ctx);
 
         // then
         StepVerifier.create(result)
-                .expectNextCount(0)
                 .verifyComplete();
-        verify(artistAlbumRepository).saveAll(artistAlbumCaptor.capture());
-        assertEquals(artistAlbumCaptor.getValue().size(), 0);
     }
 
     @Test
@@ -208,34 +205,26 @@ public class MusicSyncTest {
     void shouldInsertToDatabaseAndCacheForArtistAlbumWhenCacheMiss() throws JsonProcessingException {
         // given: JSON DTO, Album ID, MusicSyncContext, ArgumentCaptor<List<ArtistAlbumEntity>>, List<ArtistAlubmEntity>> 
         SongJsonDto dto = objectMapper.readValue(StaticTestDataRepository.testJson, SongJsonDto.class);
-        dto.setArtist("Artist1, Artist2 , Artist3");
         Long albumId = 1L;
+        Long artistId = 1L;
         MusicSyncContext ctx = new MusicSyncContext(dto);
         ctx.setAlbumId(albumId);
-        ArgumentCaptor<List<ArtistAlbumEntity>> artistAlbumCaptor = ArgumentCaptor.forClass(List.class);
-        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(dto.getArtist().split(","))
-                .map(String::trim)
-                .map(sa -> new ArtistAlbumEntity(sa, albumId))
-                .toList();
-        when(artistAlbumRepository.saveAll(anyList())).thenReturn(Flux.fromIterable(artistAlbumEntities));
+        ctx.setArtistId(artistId);
+        ArgumentCaptor<ArtistAlbumEntity> artistAlbumCaptor = ArgumentCaptor.forClass(ArtistAlbumEntity.class);
+        when(artistAlbumRepository.save(any())).thenReturn(Mono.just(new ArtistAlbumEntity(artistId, albumId)));
 
         // when
-        Flux<ArtistAlbumEntity> result = musicSyncService.saveArtistsAlbums(ctx);
+        Mono<ArtistAlbumEntity> result = musicSyncService.saveArtistsAlbums(ctx);
 
         // then
         StepVerifier.create(result)
-                .expectNextCount(artistAlbumEntities.size())
+                .expectNextMatches(aa -> aa.getArtistId() == artistId && aa.getAlbumId() == albumId)
                 .verifyComplete();
-        verify(artistAlbumRepository).saveAll(artistAlbumCaptor.capture());
-        List<ArtistAlbumEntity> filterdArtistAlbumEntities = artistAlbumCaptor.getValue();
-        assertEquals(artistAlbumEntities.stream().map(ArtistAlbumEntity::getAlbumId).toList(), 
-                     filterdArtistAlbumEntities.stream().map(ArtistAlbumEntity::getAlbumId).toList());
-        assertEquals(artistAlbumEntities.stream().map(ArtistAlbumEntity::getSplitArtistName).toList(), 
-                     filterdArtistAlbumEntities.stream().map(ArtistAlbumEntity::getSplitArtistName).toList());
-        artistAlbumEntities.forEach(entity -> {
-            String key = entity.getSplitArtistName() + "|" + entity.getAlbumId().toString();
-            assertFalse(reflectArtistAlbumCache.add(key));
-        });
+        verify(artistAlbumRepository).save(artistAlbumCaptor.capture());
+        ArtistAlbumEntity artistAlbumEntity = artistAlbumCaptor.getValue();
+        assertEquals(artistId, artistAlbumEntity.getArtistId());
+        assertEquals(albumId, artistAlbumEntity.getAlbumId());
+        assertFalse(reflectArtistAlbumCache.add(artistId + "|" + albumId));
     }
 
     @Test
