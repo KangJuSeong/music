@@ -13,4 +13,9 @@ public class SongLikeEntity {
     private Long songLikeId;
     private Long songId;
     private LocalDateTime createdAt;
+
+    public SongLikeEntity(Long songId) {
+        this.songId = songId;
+        this.createdAt = LocalDateTime.now();
+    }
 }

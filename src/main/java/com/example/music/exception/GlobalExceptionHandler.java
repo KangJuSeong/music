@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -19,8 +20,17 @@ public class GlobalExceptionHandler {
         log.error("Exception ", e);
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 LocalDateTime.now(),
-                e.toString()
+                e.getMessage()
         );
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseDto));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handleErrorStatus(ResponseStatusException e) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                LocalDateTime.now(),
+                e.getReason()
+        );
+        return Mono.just(ResponseEntity.status(e.getStatusCode()).body(errorResponseDto));
     }
 }
