@@ -6,7 +6,7 @@ import com.example.music.entity.ArtistAlbumEntity;
 import com.example.music.entity.SimilarSongEntity;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
-import com.example.music.repository.AlbumRepository;
+import com.example.music.repository.album.AlbumRepository;
 import com.example.music.repository.song.SongRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,8 +72,7 @@ public class MusicSyncService {
                     return Mono.zip(getOrSaveArtist(ctx), getOrSaveAlbum(ctx))
                             .thenReturn(ctx);
                 })
-                .flatMap(ctx -> Mono.when(saveArtistsAlbums(ctx), saveSongAndRelationEntities(ctx)),
-                        60)
+                .flatMap(ctx -> Mono.when(saveArtistsAlbums(ctx), saveSongAndRelationEntities(ctx)), 60)
                 .doFinally(signalType -> {
                     log.debug("Finish sync music data");
                     artistCache.clear();

@@ -10,7 +10,8 @@ DROP TABLE IF EXISTS albums;
 CREATE TABLE IF NOT EXISTS albums (
     album_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     album_name VARCHAR(255),
-    release_date DATE
+    release_date DATE,
+    release_year VARCHAR(4)
 );
 
 CREATE TABLE IF NOT EXISTS artists (

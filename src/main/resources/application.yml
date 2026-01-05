@@ -7,9 +7,8 @@ spring:
     password: root
 logging:
   level:
-    com:
-      example:
-        music: debug
+    com.example.music: debug
+    org.springframework.r2dbc: trace
 management:
   endpoints:
     web:

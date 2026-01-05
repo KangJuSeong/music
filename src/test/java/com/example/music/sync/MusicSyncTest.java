@@ -5,6 +5,7 @@ import com.example.music.dto.SongJsonDto;
 import com.example.music.entity.*;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
+import com.example.music.repository.album.AlbumRepository;
 import com.example.music.repository.song.SongRepository;
 import com.example.music.service.MusicSyncService;
 import com.example.music.statics.StaticTestDataRepository;
