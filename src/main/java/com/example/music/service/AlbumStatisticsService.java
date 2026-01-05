@@ -3,6 +3,7 @@ package com.example.music.service;
 import com.example.music.dto.ArtistAlbumCountDto;
 import com.example.music.dto.YearlyAlbumCountDto;
 import com.example.music.repository.album.AlbumRepository;
+import com.example.music.repository.artist.ArtistRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,9 +16,11 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class AlbumStatisticsService {
     private final AlbumRepository albumRepository;
+    private final ArtistRepository artistRepository;
 
-    public AlbumStatisticsService(AlbumRepository albumRepository) {
+    public AlbumStatisticsService(AlbumRepository albumRepository, ArtistRepository artistRepository) {
         this.albumRepository = albumRepository;
+        this.artistRepository = artistRepository;
     }
 
     public Mono<Page<YearlyAlbumCountDto>> getAlbumsCountByYearPageable(Pageable pageable) {
@@ -29,6 +32,10 @@ public class AlbumStatisticsService {
     }
 
     public Mono<Page<ArtistAlbumCountDto>> getAlbumsCountByArtistPageable(Pageable pageable) {
-        return Mono.empty();
+        return Mono.zip(
+                artistRepository.findAlbumCountByArtist(pageable)
+                        .collectList(),
+                artistRepository.countDistinctArtistForAlbums()
+        ).map(t -> new PageImpl<>(t.getT1(), pageable, t.getT2()));
     }
 }

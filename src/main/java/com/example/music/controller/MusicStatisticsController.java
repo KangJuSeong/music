@@ -45,6 +45,10 @@ public class MusicStatisticsController {
             @RequestParam(defaultValue = "artist_name") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
-        return Mono.empty();
+        Sort sort = Sort.by(sortBy);
+        sort = direction.equals("desc") ? sort.descending() : sort.ascending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        log.debug("Request artist album counts - pageable {}", pageable);
+        return albumStatisticsService.getAlbumsCountByArtistPageable(pageable);
     }
 }

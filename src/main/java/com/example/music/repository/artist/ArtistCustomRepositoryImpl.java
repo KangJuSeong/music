@@ -24,7 +24,7 @@ public class ArtistCustomRepositoryImpl implements ArtistCustomRepository {
                 """
                 SELECT a.artist_name, COUNT(DISTINCT album_id) as album_count
                 FROM artists a
-                LEFT JOIN artists_albums aa
+                JOIN artists_albums aa
                 ON a.artist_id = aa.artist_id
                 GROUP BY a.artist_id
                 ORDER BY %s %s
