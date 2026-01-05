@@ -4,6 +4,8 @@ import com.example.music.dto.SongJsonDto;
 import com.example.music.entity.*;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
+import com.example.music.repository.album.AlbumRepository;
+import com.example.music.repository.artist.ArtistRepository;
 import com.example.music.repository.song.SongRepository;
 import com.example.music.service.MusicSyncService;
 import com.example.music.statics.StaticTestDataRepository;
@@ -86,11 +88,7 @@ public class MusicSyncToDatabaseTest {
                 .map(s -> s.toSimilarSongEntity(1L))
                 .toList();
         verifySimilarSong(similarSongEntities);
-        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(dto.getArtist().split(","))
-                .map(String::trim)
-                .map(sa -> new ArtistAlbumEntity(sa, 1L))
-                .toList();
-        verifyArtistAlbum(artistAlbumEntities);
+        verifyArtistAlbum(new ArtistAlbumEntity(1L, 1L));
     }
 
     private void verifyAlbum(AlbumEntity expect) {
@@ -171,11 +169,11 @@ public class MusicSyncToDatabaseTest {
                 .containsAll(expects);
     }
 
-    private void verifyArtistAlbum(List<ArtistAlbumEntity> expects) {
-        List<ArtistAlbumEntity> artistAlbumEntities = artistAlbumRepository.findAll().collectList().block();
+    private void verifyArtistAlbum(ArtistAlbumEntity expect) {
+        ArtistAlbumEntity artistAlbumEntities = artistAlbumRepository.findAll().blockFirst();
         assert artistAlbumEntities != null;
         Assertions.assertThat(artistAlbumEntities)
-                .usingRecursiveFieldByFieldElementComparator()
-                .isEqualTo(expects);
+                .usingRecursiveComparison()
+                .isEqualTo(expect);
     }
 }

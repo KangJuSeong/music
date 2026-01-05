@@ -1,5 +1,6 @@
 package com.example.music.service;
 
+import com.example.music.dto.ArtistAlbumCountDto;
 import com.example.music.dto.YearlyAlbumCountDto;
 import com.example.music.repository.album.AlbumRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -25,5 +26,9 @@ public class AlbumStatisticsService {
                         .collectList(),
                 albumRepository.countDistinctYearForAlbums()
         ).map(t  -> new PageImpl<>(t.getT1(), pageable, t.getT2()));
+    }
+
+    public Mono<Page<ArtistAlbumCountDto>> getAlbumsCountByArtistPageable(Pageable pageable) {
+        return Mono.empty();
     }
 }

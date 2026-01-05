@@ -7,17 +7,16 @@ import com.example.music.entity.SimilarSongEntity;
 import com.example.music.init.DataInitializer;
 import com.example.music.repository.*;
 import com.example.music.repository.album.AlbumRepository;
+import com.example.music.repository.artist.ArtistRepository;
 import com.example.music.repository.song.SongRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,25 +131,18 @@ public class MusicSyncService {
                 });
     }
 
-    public Flux<ArtistAlbumEntity> saveArtistsAlbums(MusicSyncContext ctx) {
+    public Mono<ArtistAlbumEntity> saveArtistsAlbums(MusicSyncContext ctx) {
         Long albumId = ctx.getAlbumId();
+        Long artistId = ctx.getArtistId();
         String albumIdToString = albumId.toString();
-        String artistName = ctx.getDto().getArtist();
-        List<ArtistAlbumEntity> artistAlbumEntities = Arrays.stream(artistName.split(","))
-                .map(String::trim)
-                .filter(sa -> artistAlbumCache.add(sa + "|" + albumIdToString))
-                .map(sa -> new ArtistAlbumEntity(sa, albumId))
-                .toList();
-        return artistAlbumRepository.saveAll(artistAlbumEntities)
-                .onErrorResume(th -> {
-                    if (th instanceof DuplicateKeyException) {
-                        log.debug("Duplicate key insert for artist album");
-                        return Mono.empty();
-                    } else {
-                        log.error("Fail insert artist album - {}", artistAlbumEntities);
-                        return Mono.error(th);
-                    }
-                });
+        String artistIdToSTring = ctx.getArtistId().toString();
+        String cacheKey = albumIdToString + "|" + artistIdToSTring;
+        boolean isNew = artistAlbumCache.add(cacheKey);
+        if (!isNew) {
+            return Mono.empty();
+        }
+        return artistAlbumRepository.save(new ArtistAlbumEntity(artistId, albumId))
+                .doOnError(th -> log.error("Fail insert artist({}) - album({})", artistId, albumId));
     }
 
    public Flux<SimilarSongEntity> saveSimilarSongs(MusicSyncContext ctx) {

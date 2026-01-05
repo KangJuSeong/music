@@ -1,5 +1,6 @@
 package com.example.music.controller;
 
+import com.example.music.dto.ArtistAlbumCountDto;
 import com.example.music.dto.YearlyAlbumCountDto;
 import com.example.music.service.AlbumStatisticsService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,5 +36,15 @@ public class MusicStatisticsController {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         log.debug("Request yearly album counts - pageable {}", pageable);
         return albumStatisticsService.getAlbumsCountByYearPageable(pageable);
+    }
+
+    @GetMapping("/album/artist/counts")
+    public Mono<Page<ArtistAlbumCountDto>> getArtistAlbumsCounts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "artist_name") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        return Mono.empty();
     }
 }
