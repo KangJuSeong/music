@@ -25,14 +25,14 @@ public class MusicStatisticsController {
 
     @GetMapping("/album/yearly/counts")
     public Mono<Page<YearlyAlbumCountDto>> getYearlyAlbumsCounts(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "release_year") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
         Sort sort = Sort.by(sortBy);
         sort = direction.equals("desc") ? sort.descending() : sort.ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         log.debug("Request yearly album counts - pageable {}", pageable);
         return albumStatisticsService.getAlbumsCountByYearPageable(pageable);
     }

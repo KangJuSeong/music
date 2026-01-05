@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -21,15 +20,8 @@ public class AlbumStatisticsService {
     }
 
     public Mono<Page<YearlyAlbumCountDto>> getAlbumsCountByYearPageable(Pageable pageable) {
-        Sort.Order order = pageable.getSort().stream().toList().getFirst();
-        log.debug("{} {} {} {}", pageable.getPageSize(), pageable.getOffset(), order.getProperty(), order.getDirection());
         return Mono.zip(
-                albumRepository.findYearlyAlbumCounts(
-                                pageable.getPageSize(),
-                                pageable.getOffset(),
-                                order.getProperty(),
-                                order.getDirection().name()
-                        )
+                albumRepository.findAlbumCountsByYearly(pageable)
                         .collectList(),
                 albumRepository.countDistinctYearForAlbums()
         ).map(t  -> new PageImpl<>(t.getT1(), pageable, t.getT2()));

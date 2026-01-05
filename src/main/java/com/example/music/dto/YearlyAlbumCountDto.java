@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class YearlyAlbumCountDto {
     private String releaseYear;
-    private int albumCount;
+    private Long albumCount;
 }
