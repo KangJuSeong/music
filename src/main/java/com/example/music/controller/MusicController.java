@@ -8,10 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -45,8 +42,8 @@ public class MusicController {
         return songService.getSongList(pageable);
     }
 
-    @GetMapping("/{id}")
-    public Mono<Void> getMusicDetail() {
-        throw new UnsupportedOperationException();
+    @GetMapping("/{songId}")
+    public Mono<SongResponseDto> getMusicDetail(@PathVariable Long songId) {
+        return songService.getSongDetail(songId);
     }
 }

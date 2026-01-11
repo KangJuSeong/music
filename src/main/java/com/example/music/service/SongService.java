@@ -25,5 +25,9 @@ public class SongService {
                 songRepository.countSongs()
         ).map(t -> new PageImpl<>(t.getT1(), pageable, t.getT2()));
     }
+
+    public Mono<SongResponseDto> getSongDetail(Long songId) {
+        return songRepository.findByIdForDetail(songId);
+    }
 }
 

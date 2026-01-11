@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface SongCustomRepository {
     Flux<SongResponseDto> findAllByPageable(Pageable pageable);
+    Mono<SongResponseDto> findByIdForDetail(Long songId);
 }
