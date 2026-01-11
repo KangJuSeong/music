@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
     public Mono<ResponseEntity<ErrorResponseDto>> handleErrorStatus(ResponseStatusException e) {
+        log.error("Exception ", e);
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 LocalDateTime.now(),
                 e.getReason()

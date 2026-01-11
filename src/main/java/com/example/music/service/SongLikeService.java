@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 public class SongLikeService {
@@ -26,7 +28,7 @@ public class SongLikeService {
         return songRepository.findById(songId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Not exists song")))
                 .flatMap(s -> {
-                    SongLikeEntity likeEntity = new SongLikeEntity(s.getSongId());
+                    SongLikeEntity likeEntity = new SongLikeEntity(s.getSongId(), LocalDateTime.now());
                     return songLikeRepository.save(likeEntity).then();
                 });
     }
